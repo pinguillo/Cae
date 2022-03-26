@@ -13,14 +13,15 @@
   <ItemGroup>
     <ClInclude Include="Source\Cae.h" />
     <ClInclude Include="Source\Engine\App.h" />
-    <ClInclude Include="Source\Engine\Core.h" />
     <ClInclude Include="Source\Engine\Engine.h" />
+    <ClInclude Include="Source\Engine\Log.h" />
     <ClInclude Include="Source\Engine\Window.h" />
     <ClInclude Include="Source\Engine\WindowsInclude.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\App.cpp" />
     <ClCompile Include="Source\Engine\Engine.cpp" />
+    <ClCompile Include="Source\Engine\Log.cpp" />
     <ClCompile Include="Source\Engine\Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -72,6 +73,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Cae\Source\;$(SolutionDir)Cae\vendor\spdlog\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -86,6 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Cae\Source\;$(SolutionDir)Cae\vendor\spdlog\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
