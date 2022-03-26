@@ -14,9 +14,14 @@
     <ClInclude Include="Source\Cae.h" />
     <ClInclude Include="Source\Engine\App.h" />
     <ClInclude Include="Source\Engine\Core.h" />
+    <ClInclude Include="Source\Engine\Engine.h" />
+    <ClInclude Include="Source\Engine\Window.h" />
+    <ClInclude Include="Source\Engine\WindowsInclude.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\App.cpp" />
+    <ClCompile Include="Source\Engine\Engine.cpp" />
+    <ClCompile Include="Source\Engine\Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

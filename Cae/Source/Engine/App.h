@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine.h"
 
 namespace Cae {
 	class App {
@@ -7,5 +8,7 @@ namespace Cae {
 		virtual ~App();
 
 		void Run();
+	private:
+		Engine* engine;
 	};
 }
