@@ -1,14 +1,15 @@
 #pragma once
+#include "WindowsInclude.h"
 #include "Window.h"
+#include <string>
 
 namespace Cae {
 	class Engine {
 	public:
-		Engine();
-		~Engine();
+		Engine(int width, int height, const char* name);
+		~Engine() {}
 
-		void InitWindow();
-
+		int Run();
 	private:
 		Window* e_Window;
 	};

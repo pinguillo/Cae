@@ -1,20 +1,19 @@
 #pragma once
 #include "WindowsInclude.h"
+#include "Log.h"
 
 namespace Cae {
 	class Window {
 	public:
-		Window(int width, int height);
-		~Window();
+		Window(int width, int height, const char* name);
+		~Window() {}
 
-		static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-
+		static int ProcessMessages();
 	private:
+		static LRESULT CALLBACK HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	private:
+		HWND w_HWnd;
+		static constexpr const char* w_ClassName = "Cae Window";
 		HINSTANCE hInst;
-		HWND m_hWnd;
-		LPCWSTR g_WindowClassName = (LPCWSTR)L"CaeWindow";
-	private:
-		int w_Width;
-		int w_Height;
 	};
 }

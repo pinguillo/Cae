@@ -1,10 +1,17 @@
 #include "Engine.h"
 
 namespace Cae {
-	Engine::Engine() {
-		Engine::InitWindow();
+	Engine::Engine(int width, int height, const char* name)	{
+		C_ENGINE_INFO("Engine logger started.");
+		e_Window = new Window(width, height, name);
+
 	}
-	void Engine::InitWindow() {
-		e_Window = new Window(1280, 720);
+
+	int Engine::Run() {
+		while (true) {
+			if (const auto ecode = Window::ProcessMessages() != OKCODE) {
+				return ecode;
+			}
+		}
 	}
 }

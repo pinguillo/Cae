@@ -1,56 +1,56 @@
 #include "Window.h"
 
-
 namespace Cae {
-	Window::Window(int width, int height) : w_Width(width), w_Height(height), hInst(GetModuleHandle(nullptr)) {
-        WNDCLASS wc = { };
-        wc.style = CS_OWNDC;
-        wc.lpfnWndProc = WndProc;
-        wc.cbClsExtra = 0;
-        wc.cbWndExtra = 0;
-        wc.hInstance = hInst;
-        wc.hIcon = nullptr;
-        wc.hCursor = nullptr;
-        wc.hbrBackground = nullptr;
-        wc.lpszMenuName = nullptr;
-        wc.lpszClassName = g_WindowClassName;
+	Window::Window(int width, int height, const char* name) : hInst(GetModuleHandle(nullptr)) {
+        WNDCLASSEX wndClass = { 0 };
+        wndClass.cbSize = sizeof(wndClass);
+        wndClass.style = CS_OWNDC;
+        wndClass.lpfnWndProc = HandleMsg;
+        wndClass.hInstance = hInst;
+        wndClass.hCursor = nullptr;
+        wndClass.hIcon = nullptr;
+        wndClass.hbrBackground = nullptr;
+        wndClass.lpszMenuName = nullptr;
+        wndClass.lpszClassName = (LPCWSTR)w_ClassName;
 
-        RegisterClass(&wc);
+        if (!RegisterClassEx(&wndClass)) { MessageBox(NULL, L"xd", L"xd", MB_OK); }
 
-        RECT windowRect = { 0, 0, w_Width, w_Height };
+        RECT windowRect = { 0, 0, width, height };
         AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 
-        m_hWnd = CreateWindowEx(
-            0,
-            g_WindowClassName,
-            L"Cae",
-            WS_OVERLAPPEDWINDOW,
-            CW_USEDEFAULT, CW_USEDEFAULT,       // Position
-            windowRect.right - windowRect.left, // Width
-            windowRect.bottom - windowRect.top, // Height
-            NULL,
-            NULL,
-            hInst,
-            NULL
+        w_HWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
+                                (LPCWSTR)w_ClassName,
+                                (LPCWSTR)name,
+                                WS_OVERLAPPEDWINDOW,
+                                CW_USEDEFAULT, CW_USEDEFAULT,
+                                windowRect.right - windowRect.left,
+                                windowRect.bottom - windowRect.top,
+                                nullptr, nullptr, hInst, nullptr
         );
 
-        if (m_hWnd == NULL) {
-            
-        }
+        if(!w_HWnd) { MessageBoxW(NULL, (LPCWSTR)GetLastError(), L"xd", MB_OK); }
 
-        ShowWindow(m_hWnd, SW_SHOW);
-	}
-	Window::~Window() {
-
+        ShowWindow(w_HWnd, SW_SHOW);
 	}
 
-	LRESULT Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam){
-        if (msg == WM_NCCREATE) {
-            const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
-            Window* const pWnd = static_cast<Window*>(pCreate->lpCreateParams);
-            SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWnd));
+    int Window::ProcessMessages() {
+        MSG msg;
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                return (int)msg.wParam;
+            }
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }
-        // if we get a message before the WM_NCCREATE message, handle with default handler
+        return OKCODE;
+    }
+
+    LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+        switch (msg) {
+        case WM_CLOSE:
+            PostQuitMessage(0);
+            return 0;
+        }
         return DefWindowProc(hWnd, msg, wParam, lParam);
-	}
+    }
 }
