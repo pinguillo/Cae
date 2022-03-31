@@ -1,6 +1,7 @@
 #pragma once
 #include "WindowsInclude.h"
 #include "Window.h"
+#include "Graphics.h"
 #include <string>
 
 namespace Cae {
@@ -11,6 +12,9 @@ namespace Cae {
 
 		int Run();
 	private:
+		void HandleInputs();
+
 		Window* e_Window;
+		Graphics* e_Graphics;
 	};
 }

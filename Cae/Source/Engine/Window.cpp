@@ -1,7 +1,8 @@
 #include "Window.h"
+#include "Log.h"
 
 namespace Cae {
-	Window::Window(int width, int height, const char* name) : hInst(GetModuleHandle(nullptr)) {
+	Window::Window(int width, int height, const char* name) : hInst(GetModuleHandle(nullptr)), w_Width(width), w_Height(height) {
         WNDCLASSEX wndClass = { 0 };
         wndClass.cbSize = sizeof(wndClass);
         wndClass.style = CS_OWNDC;
@@ -13,7 +14,7 @@ namespace Cae {
         wndClass.lpszMenuName = nullptr;
         wndClass.lpszClassName = (LPCWSTR)w_ClassName;
 
-        if (!RegisterClassEx(&wndClass)) { MessageBox(NULL, L"xd", L"xd", MB_OK); }
+        if (!RegisterClassEx(&wndClass)) { C_ENGINE_ERROR(GetLastError()); }
 
         RECT windowRect = { 0, 0, width, height };
         AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
@@ -28,9 +29,12 @@ namespace Cae {
                                 nullptr, nullptr, hInst, nullptr
         );
 
-        if(!w_HWnd) { MessageBoxW(NULL, (LPCWSTR)GetLastError(), L"xd", MB_OK); }
+        if(!w_HWnd) { C_ENGINE_ERROR(GetLastError()); }
 
         ShowWindow(w_HWnd, SW_SHOW);
+
+        w_Graphics = new Graphics(w_HWnd, width, height);
+
 	}
 
     int Window::ProcessMessages() {
@@ -47,9 +51,12 @@ namespace Cae {
 
     LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         switch (msg) {
-        case WM_CLOSE:
-            PostQuitMessage(0);
-            return 0;
+            case WM_CLOSE:
+                PostQuitMessage(0);
+                return 0;
+            case WM_KEYDOWN:
+                w_Input.KeyPress(wParam);
+                break;
         }
         return DefWindowProc(hWnd, msg, wParam, lParam);
     }

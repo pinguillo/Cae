@@ -13,12 +13,16 @@
   <ItemGroup>
     <ClInclude Include="Source\Cae.h" />
     <ClInclude Include="Source\Engine\Engine.h" />
+    <ClInclude Include="Source\Engine\Graphics.h" />
+    <ClInclude Include="Source\Engine\Input.h" />
     <ClInclude Include="Source\Engine\Log.h" />
     <ClInclude Include="Source\Engine\Window.h" />
     <ClInclude Include="Source\Engine\WindowsInclude.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp" />
+    <ClCompile Include="Source\Engine\Graphics.cpp" />
+    <ClCompile Include="Source\Engine\Input.cpp" />
     <ClCompile Include="Source\Engine\Log.cpp" />
     <ClCompile Include="Source\Engine\Window.cpp" />
     <ClCompile Include="Source\WinMain.cpp" />
