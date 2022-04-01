@@ -51,7 +51,7 @@ namespace Cae {
 
         hr = D3D11CreateDeviceAndSwapChain(
             nullptr,
-            D3D_DRIVER_TYPE_WARP, // For testing
+            D3D_DRIVER_TYPE_WARP, // For testing and "limit" the performance in order to optimize the engine better
             nullptr,
             swapCreateFlags,
             levels,

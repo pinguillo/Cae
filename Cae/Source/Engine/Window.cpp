@@ -3,6 +3,9 @@
 
 namespace Cae {
 	Window::Window(int width, int height, const char* name) : hInst(GetModuleHandle(nullptr)), w_Width(width), w_Height(height) {
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        // Window Class /////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////
         WNDCLASSEX wndClass = { 0 };
         wndClass.cbSize = sizeof(wndClass);
         wndClass.style = CS_OWNDC;
@@ -19,6 +22,10 @@ namespace Cae {
         RECT windowRect = { 0, 0, width, height };
         AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        // Create Window ////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
         w_HWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
                                 (LPCWSTR)w_ClassName,
                                 (LPCWSTR)name,
@@ -32,6 +39,10 @@ namespace Cae {
         if(!w_HWnd) { C_ENGINE_ERROR(GetLastError()); }
 
         ShowWindow(w_HWnd, SW_SHOW);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        // Initialize D3D ///////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////
 
         w_Graphics = new Graphics(w_HWnd, width, height);
 
@@ -55,7 +66,7 @@ namespace Cae {
                 PostQuitMessage(0);
                 return 0;
             case WM_KEYDOWN:
-                w_Input.KeyPress(wParam);
+                //w_Input.KeyPress(wParam);
                 break;
         }
         return DefWindowProc(hWnd, msg, wParam, lParam);

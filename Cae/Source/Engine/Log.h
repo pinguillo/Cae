@@ -22,7 +22,7 @@ namespace Cae {
 #define C_ENGINE_ERROR(...)		::Cae::Log::GetEngineLogger()->error(__VA_ARGS__)
 
 // Client macros
-#define C_TRACE(...)		::Cae::Log::GetClientLogger()->trace(__VA_ARGS__)
-#define C_INFO(...)		::Cae::Log::GetClientLogger()->info(__VA_ARGS__)
-#define C_WARN(...)		::Cae::Log::GetClientLogger()->warn(__VA_ARGS__)
-#define C_ERROR(...)		::Cae::Log::GetClientLogger()->error(__VA_ARGS__)
+#define C_TRACE(...)			::Cae::Log::GetClientLogger()->trace(__VA_ARGS__)
+#define C_INFO(...)				::Cae::Log::GetClientLogger()->info(__VA_ARGS__)
+#define C_WARN(...)				::Cae::Log::GetClientLogger()->warn(__VA_ARGS__)
+#define C_ERROR(...)			::Cae::Log::GetClientLogger()->error(__VA_ARGS__)

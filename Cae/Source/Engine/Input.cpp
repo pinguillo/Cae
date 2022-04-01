@@ -8,6 +8,6 @@ bool Cae::Input::GetKey(WPARAM key) {
 	return false;
 }
 
-void Cae::Input::KeyPress(WPARAM wParam) {
+void Cae::Input::GetKeyPress(WPARAM wParam) {
 	//C_ENGINE_INFO( );
 }

@@ -22,7 +22,7 @@ namespace Cae {
 
 	void Engine::HandleInputs()	{
 		if (Input::GetKey(VK_SPACE)) {
-			C_ENGINE_INFO("xd");
+			C_ENGINE_INFO("xd"); // Input system testing
 		}
 	}
 }

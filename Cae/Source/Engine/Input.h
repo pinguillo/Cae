@@ -8,7 +8,7 @@ namespace Cae {
 
 		static bool GetKey(WPARAM key);
 		
-		static void KeyPress(WPARAM wParam);
+		static void GetKeyPress(WPARAM wParam); // TODO: Pls help me god, how do I do an event system or whatever I need for this
 	private:
 	};
 }
