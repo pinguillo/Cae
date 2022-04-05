@@ -13,9 +13,9 @@ namespace Cae {
         wndClass.hInstance = hInst;
         wndClass.hCursor = nullptr;
         wndClass.hIcon = nullptr;
-        wndClass.hbrBackground = nullptr;
+        wndClass.hbrBackground = (HBRUSH) 5;
         wndClass.lpszMenuName = nullptr;
-        wndClass.lpszClassName = (LPCWSTR)w_ClassName;
+        wndClass.lpszClassName = w_ClassName;
 
         if (!RegisterClassEx(&wndClass)) { C_ENGINE_ERROR(GetLastError()); }
 
@@ -27,8 +27,8 @@ namespace Cae {
         /////////////////////////////////////////////////////////////////////////////////////////////
 
         w_HWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
-                                (LPCWSTR)w_ClassName,
-                                (LPCWSTR)name,
+                                w_ClassName,
+                                name,
                                 WS_OVERLAPPEDWINDOW,
                                 CW_USEDEFAULT, CW_USEDEFAULT,
                                 windowRect.right - windowRect.left,

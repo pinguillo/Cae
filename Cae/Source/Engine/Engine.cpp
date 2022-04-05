@@ -6,6 +6,7 @@ namespace Cae {
 		C_ENGINE_INFO("Engine logger started.");
 		e_Window = new Window(width, height, name);
 		e_Graphics = e_Window->GetGraphics();
+		
 	}
 
 	int Engine::Run() {

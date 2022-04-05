@@ -36,6 +36,12 @@
     <ClInclude Include="Source\Engine\Input.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Util.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Types.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Window.cpp">
@@ -56,5 +62,9 @@
     <ClCompile Include="Source\Engine\Graphics.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\PixelShader.hlsl" />
+    <FxCompile Include="Shaders\VertexShader.hlsl" />
   </ItemGroup>
 </Project>
