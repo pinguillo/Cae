@@ -1,7 +1,10 @@
 #pragma once
 #include <wrl.h>
+
 #include <d3d11.h>
+#include <DirectXMath.h>
 #include <d3dcompiler.h>
+
 #include "Types.h"
 
 namespace Cae {
@@ -14,12 +17,13 @@ namespace Cae {
 
 		ID3D11Device* GetDevice() { return g_Device.Get(); }
 	private:
-		void SetupShaders();
-		void SetupRenderedNTTs();
+		void SetupPipeline();
 	private:
 		UINT width;
 		UINT height;
 		D3D_FEATURE_LEVEL g_FeatureLevel;
+
+		float tempFloat0;
 
 		Microsoft::WRL::ComPtr<ID3D11Device>			g_Device;
 		Microsoft::WRL::ComPtr<IDXGISwapChain>			g_SwapChain;
@@ -27,8 +31,16 @@ namespace Cae {
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	g_BackBuffer;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	g_DepthStencilView;
 
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pVBuffer; //Prone to deletion
-		Microsoft::WRL::ComPtr<ID3D11InputLayout> pLayout;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>			g_ConstantBuffer;
+
+		Microsoft::WRL::ComPtr<ID3D11Buffer>			g_VertexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>			g_IndexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11InputLayout>		g_Layout;
+
+	private:
+		DirectX::XMMATRIX g_World;
+		DirectX::XMMATRIX g_View;
+		DirectX::XMMATRIX g_Projection;
 	};
 
 	class Shader {

@@ -14,15 +14,28 @@ namespace Cae {
         D3D_FEATURE_LEVEL_11_1
     };
 
+    struct ConstantBuffer {
+        DirectX::XMMATRIX mWorld;
+        DirectX::XMMATRIX mView;
+        DirectX::XMMATRIX mProjection;
+    };
+
     VERTEX Vertices[] =
     {
-        {   0.0f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f},
-        {   0.45f, -0.5, 0.0f,      0.0f, 1.0f, 0.0f, 1.0f},
-        {   -0.45f, -0.5f, 0.0f,    0.0f, 0.0f, 1.0f, 1.0f}
+        {   -1.0f, 1.0f, -1.0f,     1.0f, 0.0f, 0.0f, 1.0f},
+        {   1.0f, 1.0, -1.0f,      0.0f, 1.0f, 0.0f, 1.0f},
+        {   1.0f, 1.0f, 1.0f,    0.0f, 0.0f, 1.0f, 1.0f},
+        {   -1.0f, 1.0f, 1.0f,    1.0f, 1.0f, 1.0f, 1.0f},
+
+        {   -1.0f, -1.0f, -1.0f,    1.0f, 0.0f, 1.0f, 1.0f},
+        {   1.0f, -1.0f, -1.0f,    0.0f, 1.0f, 1.0f, 1.0f},
+        {   1.0f, -1.0f, 1.0f,    0.0f, 0.0f, 1.0f, 1.0f},
+        {   -1.0f, -1.0f, 1.0f,    1.0f, 1.0f, 1.0f, 1.0f}
     };
 
 
 	Graphics::Graphics(HWND hWnd, int width, int height) : width(width), height(height) {
+        ScopedTimer("DirectX initialization");
         HRESULT hr;
         /////////////////////////////////////////////////////////////////////////////////////////////
         // Create Swap-chain descriptor /////////////////////////////////////////////////////////////
@@ -50,7 +63,8 @@ namespace Cae {
     swapCreateFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-        /////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////
+        // ////////////////////////////////////////////
         // Create Device + Swap-chain ///////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,9 +128,9 @@ namespace Cae {
 
         g_Context->RSSetViewports(1, &viewport);
 
+        tempFloat0 = 0.0f;
 
-        SetupShaders();
-        SetupRenderedNTTs();
+        SetupPipeline();
 	}
 
     Graphics::~Graphics() {
@@ -124,12 +138,27 @@ namespace Cae {
     }
 
     void Graphics::RenderFrame() {
-        const FLOAT color[4] = { 0.0f, 0.2f, 0.4f, 1.0f };
+        ScopedTimer("Render");
+        const FLOAT color[4] = { 0.172f, 0.184f, 0.2f, 1.0f };
         g_Context->ClearRenderTargetView(g_BackBuffer.Get(), color);
 
         // Render
+        tempFloat0 += (float)DirectX::XM_PI * 0.0025f;
 
-        g_Context->Draw(3, 0);
+        DirectX::XMMATRIX rotY = DirectX::XMMatrixRotationY(tempFloat0);
+        DirectX::XMMATRIX rotX = DirectX::XMMatrixRotationX(tempFloat0);
+        g_World = rotY * rotX;
+
+        ConstantBuffer cb;
+        cb.mWorld = DirectX::XMMatrixTranspose(g_World);
+        cb.mView = DirectX::XMMatrixTranspose(g_View);
+        cb.mProjection = DirectX::XMMatrixTranspose(g_Projection);
+
+        g_Context->UpdateSubresource(g_ConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+
+        g_Context->VSSetConstantBuffers(0, 1, g_ConstantBuffer.GetAddressOf());
+
+        g_Context->DrawIndexed(36, 0, 0);
 
         // Swap buffer
         HRESULT hr;
@@ -138,7 +167,9 @@ namespace Cae {
         }
     }
 
-    void Graphics::SetupShaders() {
+    void Graphics::SetupPipeline() {
+        ScopedTimer("Shader initialization");
+        HRESULT hr;
         Shader* shader = new Shader(this, "ShaderBins\\VertexShader.cso", "ShaderBins\\PixelShader.cso");
 
         // Load Vertex Shader
@@ -147,43 +178,111 @@ namespace Cae {
         // Load Pixel Shader
         g_Context->PSSetShader(shader->s_PixelShader.Get(), nullptr, 0u);
 
+        // Create vertex buffer
         D3D11_BUFFER_DESC bd = {};
-        bd.Usage = D3D11_USAGE_DYNAMIC;
-        bd.ByteWidth = sizeof(VERTEX) * 3;
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.ByteWidth = sizeof(VERTEX) * 8;
         bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-        g_Device->CreateBuffer(&bd, nullptr, &pVBuffer);
-
-        D3D11_MAPPED_SUBRESOURCE ms;
-        g_Context->Map(pVBuffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
-        memcpy(ms.pData, Vertices, sizeof(Vertices));
-        g_Context->Unmap(pVBuffer.Get(), NULL);
+        bd.CPUAccessFlags = 0;
 
 
+        D3D11_SUBRESOURCE_DATA sd = {};
+        sd.pSysMem = Vertices;
+
+        hr = g_Device->CreateBuffer(&bd, &sd, &g_VertexBuffer);
+        if (FAILED(hr)) {
+            _com_error err(hr);
+            MessageBox(nullptr, err.ErrorMessage(), "Buffer error", MB_OK | MB_ICONERROR);
+        }
+
+        // Define the input layout
         D3D11_INPUT_ELEMENT_DESC ied[] =
         {
-            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"POSITION",    0,  DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,   D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR",       0,  DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0},
         };
 
-        g_Device->CreateInputLayout(
+        hr = g_Device->CreateInputLayout(
             ied,
             2,
             shader->s_VSBlob->GetBufferPointer(),
             shader->s_VSBlob->GetBufferSize(),
-            &pLayout
+            &g_Layout
         );
+        if (FAILED(hr)) {
+            _com_error err(hr);
+            MessageBox(nullptr, err.ErrorMessage(), "Input layout error", MB_OK | MB_ICONERROR);
+        }
 
-        g_Context->IASetInputLayout(pLayout.Get());
-    }
+        g_Context->IASetInputLayout(g_Layout.Get());
 
-    void Graphics::SetupRenderedNTTs() {
+        // Set vertex buffer
         UINT stride = sizeof(VERTEX);
         UINT offset = 0;
 
-        g_Context->IASetVertexBuffers(0, 1, pVBuffer.GetAddressOf(), &stride, &offset);
+        g_Context->IASetVertexBuffers(0, 1, g_VertexBuffer.GetAddressOf(), &stride, &offset);
+
+        // Create index buffer
+        WORD Indices[] = {
+            3,1,0,
+            2,1,3,
+
+            0,5,4,
+            1,5,0,
+
+            3,4,7,
+            0,4,3,
+
+            1,6,5,
+            2,6,1,
+
+            2,7,6,
+            3,7,2,
+
+            6,4,5,
+            7,4,6,
+        };
+
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.ByteWidth = sizeof(WORD) * 36;
+        bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        bd.CPUAccessFlags = 0;
+
+        sd.pSysMem = Indices;
+
+        hr = g_Device->CreateBuffer(&bd, &sd, &g_IndexBuffer);
+        if (FAILED(hr)) {
+            _com_error err(hr);
+            MessageBox(nullptr, err.ErrorMessage(), "Buffer error", MB_OK | MB_ICONERROR);
+        }
+
+        g_Context->IASetIndexBuffer(g_IndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+
         g_Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+        // Create the constant buffer
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.ByteWidth = sizeof(ConstantBuffer);
+        bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        bd.CPUAccessFlags = 0;
+        g_Device->CreateBuffer(&bd, nullptr, &g_ConstantBuffer);
+        if (FAILED(hr)) {
+            _com_error err(hr);
+            MessageBox(nullptr, err.ErrorMessage(), "Buffer error", MB_OK | MB_ICONERROR);
+        }
+
+        // Initialize the world matrix
+        g_World = DirectX::XMMatrixIdentity();
+
+        // Initialize the view matrix
+        DirectX::XMVECTOR Eye = DirectX::XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
+        DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        g_View = DirectX::XMMatrixLookAtLH(Eye, At, Up);
+
+        // Initialize the projection matrix
+        g_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, width / (FLOAT)height, 0.01f, 100.0f);
+
     }
 
     Shader::Shader(Graphics* gfx, const char* vertexShaderDir, const char* pixelShaderDir) {
